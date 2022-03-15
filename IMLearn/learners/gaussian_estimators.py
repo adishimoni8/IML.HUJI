@@ -88,7 +88,11 @@ class UnivariateGaussian:
         """
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
-        return np.array(norm.pdf(X, self.mu_, self.var_))
+
+        def norm_pdf(x):
+            return 1 / (np.sqrt(2*np.pi*self.var_)) * np.exp(-(x-self.mu_)**2/(2.0*self.var_))
+
+        return np.array([norm_pdf(x) for x in X])
 
     @staticmethod
     def log_likelihood(mu: float, sigma: float, X: np.ndarray) -> float:
@@ -187,7 +191,17 @@ class MultivariateGaussian:
         """
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
-        return np.array(multivariate_normal.pdf(X, self.mu_, self.cov_))
+
+        def mul_norm_pdf(x, x_T):
+            det_cov = np.linalg.det(self.cov_)
+            con_inv = np.linalg.inv(self.cov_)
+            two_pi_to_the_d = pow(2 * np.pi, len(X[0]))
+            return 1 / np.sqrt(two_pi_to_the_d * det_cov) * np.exp((-0.5) * np.matmul(np.matmul(x, con_inv), x_T))
+
+        m = len(X)
+        centered_X = X - self.mu_
+        centered_X_T = np.transpose(centered_X)
+        return np.array([mul_norm_pdf(centered_X[i], centered_X_T[:, i]) for i in range(m)])
 
     @staticmethod
     def log_likelihood(mu: np.ndarray, cov: np.ndarray, X: np.ndarray) -> float:
@@ -215,8 +229,7 @@ class MultivariateGaussian:
         cov_det = np.linalg.det(cov)
         centered_X = X - mu
         centered_X_T = np.transpose(centered_X)
-        for i in range(m):
-            x = np.matmul(np.matmul(centered_X[i], cov_inverted), centered_X_T[:, i])
+        for x in range(m):
             val += np.matmul(np.matmul(centered_X[i], cov_inverted), centered_X_T[:, i])
         val += (m * np.log(cov_det))
         val += (m * d * np.log(2 * np.pi))
@@ -248,6 +261,10 @@ if __name__ == '__main__':
 
     # Q3:
     Y = univariate_gaussian.pdf(X)
+    # realpdfs = norm.pdf(X, univariate_gaussian.mu_, univariate_gaussian.var_)
+    # for i in range(10):
+    #     if Y[i] - realpdfs[i] > 0.001:
+    #         print(Y[i], realpdfs[i])
     plt.scatter(X, Y)
     plt.xlabel('samples')
     plt.ylabel('pdf')
@@ -265,8 +282,15 @@ if __name__ == '__main__':
     multivariate_gaussian.fit(X2)
     print(multivariate_gaussian.mu_, '\n', multivariate_gaussian.cov_)
 
+
+    # pdfss = multivariate_gaussian.pdf(X2)
+    # realpdfss = multivariate_normal.pdf(X2, multivariate_gaussian.mu_, multivariate_gaussian.cov_)
+    # for i in range(10):
+    #     if pdfss[i] - realpdfss[i] > 0.01:
+    #         print(pdfss[i], realpdfss[i])
+
     # Q5:
-    f1, f3 = np.linspace(-10, 10, 30), np.linspace(-10, 10, 30)
+    f1, f3 = np.linspace(-10, 10, 200), np.linspace(-10, 10, 200)
     Z = np.array([[multivariate_gaussian.log_likelihood(np.array([i, 0, j, 0]), sigma2, X2) for i in f1] for j in f3])
 
     graph_ticks = np.linspace(-10,10,20);
