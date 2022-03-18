@@ -2,9 +2,8 @@ from IMLearn.learners import UnivariateGaussian, MultivariateGaussian
 import numpy as np
 import plotly.graph_objects as go
 import plotly.io as pio
-
-pio.templates.default = "simple_white"
 import matplotlib.pyplot as plt
+pio.templates.default = "simple_white"
 
 
 def test_univariate_gaussian():
@@ -14,9 +13,6 @@ def test_univariate_gaussian():
     X = np.random.normal(mu, sigma, num_of_samples)
     univariate_gaussian.fit(X)
     print('(', univariate_gaussian.mu_, univariate_gaussian.var_, ')')
-
-    print(univariate_gaussian.log_likelihood(10, 1, np.array([1, 5, 2, 3, 8, -4, -2, 5, 1, 10, -10, 4, 5, 2, 7, 1, 1, 3, 2, -1, -3, 1, -4, 1, 2, 1,
-          -4, -4, 1, 3, 2, 6, -6, 8, 3, -6, 4, 1, -2, 3, 1, 4, 1, 4, -2, 3, -1, 0, 3, 5, 0, -2])))
 
     # Question 2 - Empirically showing sample mean is consistent
     ms = np.linspace(10, 1000, 100).astype(int)
@@ -64,11 +60,11 @@ def test_multivariate_gaussian():
     plt.show()
 
     # Question 6 - Maximum likelihood
-    maximizer = np.argmax(z)
-    print(maximizer)
+    maximizer = (np.argwhere(z == z.max()))[0]
+
     print('The maximizer of the liklihood is mu=[',
-          round(f1[int(maximizer / mesh_length)], 3), ', 0 ,',
-          round(f3[int(maximizer % mesh_length)], 3), ', 0 ]')
+          round(f1[maximizer[1]], 4), ', 0 ,',
+          round(f3[maximizer[0]], 4), ', 0 ]')
 
 
 if __name__ == '__main__':
