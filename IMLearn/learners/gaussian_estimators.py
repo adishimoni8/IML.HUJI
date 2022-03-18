@@ -1,11 +1,6 @@
 from __future__ import annotations
 import numpy as np
 from numpy.linalg import inv, det, slogdet
-from scipy.stats import norm, multivariate_normal
-import matplotlib.pyplot as plt
-import numpy as np
-import seaborn as sns
-
 
 
 class UnivariateGaussian:
@@ -59,12 +54,11 @@ class UnivariateGaussian:
         """
         m = len(X)
         self.mu_ = X.mean()
-        self.var_ = np.sum(pow(X - self.mu_, 2))
+        self.var_ = np.sum((X - self.mu_) ** 2)
         if not self.biased_:
             self.var_ /= (m - 1)
         else:
             self.var_ /= m
-
         self.fitted_ = True
         return self
 
@@ -89,10 +83,7 @@ class UnivariateGaussian:
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
 
-        def norm_pdf(x):
-            return 1 / (np.sqrt(2*np.pi*self.var_)) * np.exp(-(x-self.mu_)**2/(2.0*self.var_))
-
-        return np.array([norm_pdf(x) for x in X])
+        return (1 / (np.sqrt(2 * np.pi * self.var_))) * np.exp(-((X - self.mu_) ** 2) / (2 * self.var_))
 
     @staticmethod
     def log_likelihood(mu: float, sigma: float, X: np.ndarray) -> float:
@@ -113,11 +104,8 @@ class UnivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        val = 1
         m = len(X)
-        for i in range(m):
-            val *= norm(mu, pow(sigma, 2)).pdf(i)
-        return np.log(val)
+        return (-1. / 2) * (m * np.log(2 * np.pi) + m * np.log(sigma ** 2) + (1 / (sigma ** 2)) * np.sum((X - mu) ** 2))
 
 
 class MultivariateGaussian:
@@ -165,9 +153,10 @@ class MultivariateGaussian:
         Then sets `self.fitted_` attribute to `True`
         """
         m = len(X)
-        self.mu_ = X.mean(0)
+        self.mu_ = X.mean(axis=0)
         centered_X = X - self.mu_
-        self.cov_ = np.matmul(np.transpose(centered_X), centered_X) * (1. / m)
+        transposed_X = X.T
+        self.cov_ = np.matmul(transposed_X, centered_X) * (1. / (m - 1))
         self.fitted_ = True
         return self
 
@@ -200,7 +189,7 @@ class MultivariateGaussian:
 
         m = len(X)
         centered_X = X - self.mu_
-        centered_X_T = np.transpose(centered_X)
+        centered_X_T = centered_X.T
         return np.array([mul_norm_pdf(centered_X[i], centered_X_T[:, i]) for i in range(m)])
 
     @staticmethod
@@ -228,82 +217,6 @@ class MultivariateGaussian:
         cov_inverted = np.linalg.inv(cov)
         cov_det = np.linalg.det(cov)
         centered_X = X - mu
-        centered_X_T = np.transpose(centered_X)
-        for x in range(m):
-            val += np.matmul(np.matmul(centered_X[i], cov_inverted), centered_X_T[:, i])
-        val += (m * np.log(cov_det))
-        val += (m * d * np.log(2 * np.pi))
-        val *= (-0.5)
-        return val
-
-
-if __name__ == '__main__':
-    mu, sigma = 10, 1
-
-    # Q1:
-    univariate_gaussian = UnivariateGaussian()
-    X = np.random.normal(mu, sigma, 1000)
-    univariate_gaussian.fit(X)
-    print('(', univariate_gaussian.mu_, univariate_gaussian.var_, ')')
-
-    # # Q2:
-    ms = np.linspace(10, 1000, 100).astype(int)
-    values = []
-    for m in ms:
-        univariate_gaussian.fit(X[:m])
-        values.append(abs(mu - univariate_gaussian.mu_))
-
-    plt.plot(ms, values)
-    plt.title('Abs. distance between the estimated and true value of the expectation')
-    plt.xlabel('Number of Samples')
-    plt.ylabel('Absolute Distance')
-    plt.show()
-
-    # Q3:
-    Y = univariate_gaussian.pdf(X)
-    # realpdfs = norm.pdf(X, univariate_gaussian.mu_, univariate_gaussian.var_)
-    # for i in range(10):
-    #     if Y[i] - realpdfs[i] > 0.001:
-    #         print(Y[i], realpdfs[i])
-    plt.scatter(X, Y)
-    plt.xlabel('samples')
-    plt.ylabel('pdf')
-    plt.show()
-
-    # Q4:
-    mu2 = np.array([0, 0, 4, 0])
-    sigma2 = np.array([[1, 0.2, 0, 0.5],
-                       [0.2, 2, 0, 0],
-                       [0, 0, 1, 0],
-                       [0.5, 0, 0, 1]])
-
-    X2 = np.random.multivariate_normal(mu2, sigma2, 1000)
-    multivariate_gaussian = MultivariateGaussian()
-    multivariate_gaussian.fit(X2)
-    print(multivariate_gaussian.mu_, '\n', multivariate_gaussian.cov_)
-
-
-    # pdfss = multivariate_gaussian.pdf(X2)
-    # realpdfss = multivariate_normal.pdf(X2, multivariate_gaussian.mu_, multivariate_gaussian.cov_)
-    # for i in range(10):
-    #     if pdfss[i] - realpdfss[i] > 0.01:
-    #         print(pdfss[i], realpdfss[i])
-
-    # Q5:
-    f1, f3 = np.linspace(-10, 10, 200), np.linspace(-10, 10, 200)
-    Z = np.array([[multivariate_gaussian.log_likelihood(np.array([i, 0, j, 0]), sigma2, X2) for i in f1] for j in f3])
-
-    graph_ticks = np.linspace(-10,10,20);
-    print(graph_ticks)
-    ax = sns.heatmap(Z)
-    ax.set_xticks = graph_ticks
-    ax.set_yticks = graph_ticks
-    ax.invert_yaxis()
-    plt.show()
-
-    # Q6:
-    max_liklihood = np.argmax(Z)
-    print('The maximizer of the liklihood is mu=[',
-          round(f1[int(max_liklihood / 10)], 3), ', 0 ,',
-          round(f3[int(max_liklihood % 10)], 3), ', 0 ]')
-
+        transposed_centered_X = centered_X.T
+        return (-1. / 2) * (m * d * np.log(2 * np.pi) + m * np.log(cov_det) +
+                           np.sum(np.matmul(np.matmul(centered_X, cov_inverted), transposed_centered_X)))
