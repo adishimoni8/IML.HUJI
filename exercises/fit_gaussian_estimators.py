@@ -12,7 +12,7 @@ def test_univariate_gaussian():
     univariate_gaussian = UnivariateGaussian()
     X = np.random.normal(mu, sigma, num_of_samples)
     univariate_gaussian.fit(X)
-    print('(', univariate_gaussian.mu_, univariate_gaussian.var_, ')')
+    print('(' + str(univariate_gaussian.mu_) + ', ' + str(univariate_gaussian.var_) + ')')
 
     # Question 2 - Empirically showing sample mean is consistent
     ms = np.linspace(10, 1000, 100).astype(int)
@@ -54,7 +54,7 @@ def test_multivariate_gaussian():
     mesh_length = 200
     f1, f3 = np.linspace(-10, 10, mesh_length), np.linspace(-10, 10, mesh_length)
     x, y = np.meshgrid(f1, f3)
-    z = np.array([[multivariate_gaussian.log_likelihood(np.array([i, 0, j, 0]), sigma, X) for i in f1] for j in f3])
+    z = np.array([[multivariate_gaussian.log_likelihood(np.array([j, 0, i, 0]), sigma, X) for i in f1] for j in f3])
     plt.pcolormesh(x, y, z)
     plt.colorbar()
     plt.show()
@@ -63,8 +63,8 @@ def test_multivariate_gaussian():
     maximizer = (np.argwhere(z == z.max()))[0]
 
     print('The maximizer of the liklihood is mu=[',
-          round(f1[maximizer[1]], 4), ', 0 ,',
-          round(f3[maximizer[0]], 4), ', 0 ]')
+          round(f1[maximizer[0]], 4), ', 0 ,',
+          round(f3[maximizer[1]], 4), ', 0 ]')
 
 
 if __name__ == '__main__':
