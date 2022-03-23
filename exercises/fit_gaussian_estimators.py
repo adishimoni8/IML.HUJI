@@ -54,8 +54,8 @@ def test_multivariate_gaussian():
     mesh_length = 200
     f1, f3 = np.linspace(-10, 10, mesh_length), np.linspace(-10, 10, mesh_length)
     x, y = np.meshgrid(f1, f3)
-    z = np.array([[multivariate_gaussian.log_likelihood(np.array([j, 0, i, 0]), sigma, X) for i in f1] for j in f3])
-    plt.pcolormesh(x, y, z)
+    z = np.array([[multivariate_gaussian.log_likelihood(np.array([i, 0, j, 0]), sigma, X) for i in f1] for j in f3])
+    plt.pcolormesh(y, x, z)
     plt.colorbar()
     plt.show()
 
