@@ -52,13 +52,10 @@ class UnivariateGaussian:
         Sets `self.mu_`, `self.var_` attributes according to calculated estimation (where
         estimator is either biased or unbiased). Then sets `self.fitted_` attribute to `True`
         """
-        m, _ = X.shape
+        m = X.size
         self.mu_ = X.mean()
-        self.var_ = np.sum((X - self.mu_) ** 2)
-        if not self.biased_:
-            self.var_ /= (m - 1)
-        else:
-            self.var_ /= m
+        divide_by = (m - 1) if not self.biased_ else m
+        self.var_ = np.sum((X - self.mu_) ** 2) / divide_by
         self.fitted_ = True
         return self
 
@@ -104,7 +101,7 @@ class UnivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        m, _ = X.shape
+        m = X.size
         return (-1 / 2) * (m * np.log(2 * np.pi) + m * np.log(sigma ** 2) + (1 / (sigma ** 2)) * np.sum((X - mu) ** 2))
 
 
@@ -179,11 +176,11 @@ class MultivariateGaussian:
         """
         if not self.fitted_:
             raise ValueError("Estimator must first be fitted before calling `pdf` function")
-
+        _, d = X.shape
         ctr_X = X - self.mu_
         con_inv = np.linalg.inv(self.cov_)
         det_cov = np.linalg.det(self.cov_)
-        two_pi_to_the_d = pow(2 * np.pi, len(X[0]))
+        two_pi_to_the_d = pow(2 * np.pi, d)
         return 1 / np.sqrt(two_pi_to_the_d * det_cov) * np.exp((-0.5) * (ctr_X @ con_inv @ ctr_X.T))
 
     @staticmethod
@@ -209,6 +206,6 @@ class MultivariateGaussian:
         cov_inv = np.linalg.inv(cov)
         cov_det = np.linalg.det(cov)
         ctr_X = X - mu
-        con_inv_ctr_x = np.einsum('ij,jk->ik', ctr_X, cov_inv)
+        con_inv_ctr_x = ctr_X @ cov_inv
         wanted_sum = np.einsum('ij,ji->', con_inv_ctr_x, ctr_X.T)
-        return (-1. / 2) * (m * d * np.log(2 * np.pi) + m * np.log(cov_det) + wanted_sum)
+        return (-1 / 2) * (m * d * np.log(2 * np.pi) + m * np.log(cov_det) + wanted_sum)
