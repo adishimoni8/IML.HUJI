@@ -12,7 +12,7 @@ def test_univariate_gaussian():
     univariate_gaussian = UnivariateGaussian()
     X = np.random.normal(mu, sigma, num_of_samples)
     univariate_gaussian.fit(X)
-    print('(' + str(univariate_gaussian.mu_) + ', ' + str(univariate_gaussian.var_) + ')')
+    print('(', univariate_gaussian.mu_, ', ', univariate_gaussian.var_, ')', sep='')
 
     # Question 2 - Empirically showing sample mean is consistent
     ms = np.linspace(10, 1000, 100).astype(int)
@@ -21,7 +21,7 @@ def test_univariate_gaussian():
         univariate_gaussian.fit(X[:m])
         values.append(abs(mu - univariate_gaussian.mu_))
 
-    plt.plot(ms, values)
+    plt.plot(ms, values, marker='.', markersize=4)
     plt.title('Abs. dist. between the estimated and true value of the expectation')
     plt.xlabel('Number of Samples')
     plt.ylabel('Absolute Distance')
@@ -48,7 +48,7 @@ def test_multivariate_gaussian():
     X = np.random.multivariate_normal(mu, sigma, num_of_samples)
     multivariate_gaussian = MultivariateGaussian()
     multivariate_gaussian.fit(X)
-    print(multivariate_gaussian.mu_, '\n', multivariate_gaussian.cov_)
+    print(multivariate_gaussian.mu_, '\n', multivariate_gaussian.cov_, sep='')
 
     # Question 5 - Likelihood evaluation
     mesh_length = 200
@@ -62,9 +62,9 @@ def test_multivariate_gaussian():
     # Question 6 - Maximum likelihood
     maximizer = (np.argwhere(z == z.max()))[0]
 
-    print('The maximizer of the liklihood is mu=[',
-          round(f1[maximizer[0]], 4), ', 0 ,',
-          round(f3[maximizer[1]], 4), ', 0 ]')
+    print('The maximizer of the liklihood is mu = [',
+          round(f1[maximizer[0]], 4), ', 0, ',
+          round(f3[maximizer[1]], 4), ', 0]', sep='')
 
 
 if __name__ == '__main__':
