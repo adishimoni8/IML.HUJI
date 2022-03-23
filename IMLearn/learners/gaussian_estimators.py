@@ -52,7 +52,7 @@ class UnivariateGaussian:
         Sets `self.mu_`, `self.var_` attributes according to calculated estimation (where
         estimator is either biased or unbiased). Then sets `self.fitted_` attribute to `True`
         """
-        m = X.shape[0]
+        m, _ = X.shape
         self.mu_ = X.mean()
         self.var_ = np.sum((X - self.mu_) ** 2)
         if not self.biased_:
@@ -104,7 +104,7 @@ class UnivariateGaussian:
         log_likelihood: float
             log-likelihood calculated
         """
-        m = X.shape[0]
+        m, _ = X.shape
         return (-1 / 2) * (m * np.log(2 * np.pi) + m * np.log(sigma ** 2) + (1 / (sigma ** 2)) * np.sum((X - mu) ** 2))
 
 
@@ -152,7 +152,7 @@ class MultivariateGaussian:
         Sets `self.mu_`, `self.cov_` attributes according to calculated estimation.
         Then sets `self.fitted_` attribute to `True`
         """
-        m = X.shape[0]
+        m, _ = X.shape
         self.mu_ = X.mean(axis=0)
         ctr_X = X - self.mu_
         self.cov_ = (1 / (m - 1)) * (X.T @ ctr_X)
