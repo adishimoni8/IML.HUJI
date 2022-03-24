@@ -54,7 +54,8 @@ def test_multivariate_gaussian():
     mesh_length = 200
     f1, f3 = np.linspace(-10, 10, mesh_length), np.linspace(-10, 10, mesh_length)
     x, y = np.meshgrid(f1, f3)
-    z = np.array([[multivariate_gaussian.log_likelihood(np.array([i, 0, j, 0]), sigma, X) for i in f1] for j in f3])
+    f = np.vectorize(lambda i, j: multivariate_gaussian.log_likelihood(np.array([i, 0, j, 0]), sigma, X))
+    z = f(x, y)
     plt.pcolormesh(y, x, z)
     plt.title('Heatmap of the Logliklihood of mu = [f1, 0, f3, 0]')
     plt.xlabel('f1 values')
