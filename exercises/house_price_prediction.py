@@ -8,6 +8,10 @@ import plotly.graph_objects as go
 import plotly.express as px
 import plotly.io as pio
 pio.templates.default = "simple_white"
+import matplotlib.pyplot as plt
+# from sklearn.linear_model import LinearRegression
+
+
 
 
 def load_data(filename: str):
@@ -23,7 +27,16 @@ def load_data(filename: str):
     Design matrix and response vector (prices) - either as a single
     DataFrame or a Tuple[DataFrame, Series]
     """
-    raise NotImplementedError()
+    df = pd.read_csv(filename, index_col=0).dropna().reset_index()
+    df = df.drop(columns=['zipcode', 'id', 'date'])
+    df = df.drop(df[df.bedrooms == 0].index)
+    df = df.drop(df[df.price <= 0].index)
+    df = df.drop(df[df.floors == 0].index)
+    df = df.drop(df[df.bathrooms == 0].index)
+    df = df.drop(df[df.yr_built <= 1700].index)
+    response = df.price
+    df.drop(['price'], axis=1)
+    return df, response
 
 
 def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") -> NoReturn:
@@ -43,19 +56,27 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
     output_path: str (default ".")
         Path to folder in which plots are saved
     """
-    raise NotImplementedError()
+    for col_name, col in X.iteritems():
+        correlation = str(y.cov(col) / (y.std() * col.std()))
+        plt.title(f"Pearson Correlation: {correlation}")
+        plt.xlabel(col_name)
+        plt.ylabel('price')
+        plt.scatter(x=col, y=y)
+        plt.show()
+        plt.savefig(f"{output_path}/{col_name}")
 
 
 if __name__ == '__main__':
     np.random.seed(0)
+
     # Question 1 - Load and preprocessing of housing prices dataset
-    raise NotImplementedError()
+    X, y = load_data('../datasets/house_prices.csv')
 
     # Question 2 - Feature evaluation with respect to response
-    raise NotImplementedError()
+    # feature_evaluation(X, y)
 
     # Question 3 - Split samples into training- and testing sets.
-    raise NotImplementedError()
+    train_X, train_y, test_X, test_y = split_train_test(X, y, 0.75)
 
     # Question 4 - Fit model over increasing percentages of the overall training data
     # For every percentage p in 10%, 11%, ..., 100%, repeat the following 10 times:
@@ -64,4 +85,33 @@ if __name__ == '__main__':
     #   3) Test fitted model over test set
     #   4) Store average and variance of loss over test set
     # Then plot average loss as function of training size with error ribbon of size (mean-2*std, mean+2*std)
-    raise NotImplementedError()
+    size = 91
+    start = 10
+    end = 100
+    training_size = np.linspace(start, end, size)
+    avg_loss, var_loss = np.zeros(size), np.zeros(size)
+    for p in training_size:
+        losses = np.zeros(10)
+        for i in range(10):
+            samples = train_X.sample(frac=p/100)
+            results = train_y[samples.index]
+            lr = LinearRegression()
+            lr.fit(samples, results)
+            losses[i] = lr.loss(test_X, test_y)
+            # samples = train_X.sample(frac=p / 100)
+            # results = train_y[samples.index]
+            # reg = LinearRegression().fit(samples, results)
+            # score = test_X @ reg.coef_
+            # m = score.shape[0]
+            # losses[i] = np.sum((test_y - score) ** 2) / m
+        avg_loss[int(p) - start] = losses.mean()
+        var_loss[int(p) - start] = losses.std()
+    conf = 2 * np.asarray(var_loss)
+    plt.plot(training_size, avg_loss)
+    plt.fill_between(training_size, avg_loss-conf, avg_loss+conf, color='y')
+    plt.show()
+
+
+
+
+
