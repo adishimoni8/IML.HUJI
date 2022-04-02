@@ -62,7 +62,6 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         plt.xlabel(col_name)
         plt.ylabel('price')
         plt.scatter(x=col, y=y)
-        plt.show()
         plt.savefig(f"{output_path}/{col_name}")
 
 
