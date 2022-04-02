@@ -20,7 +20,7 @@ class LassoObjective(BaseModule):
             Value of regularization parameter lambda
 
         nfeatures: int
-            Dimensionality of data
+            Dimensionality of data_X
 
         include_intercept: bool, default=True
             Should fitted model include an intercept or not
@@ -69,10 +69,10 @@ class LassoRegression(BaseEstimator):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to fit an estimator for
+            Input data_X to fit an estimator for
 
         y : ndarray of shape (n_samples, )
-            Responses of input data to fit to
+            Responses of input data_X to fit to
 
         Notes
         -----
@@ -88,7 +88,7 @@ class LassoRegression(BaseEstimator):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to predict responses for
+            Input data_X to predict responses for
 
         Returns
         -------

@@ -57,11 +57,11 @@ def evaluate_and_export(estimator: BaseEstimator, X: np.ndarray, filename: str):
 if __name__ == '__main__':
     np.random.seed(0)
 
-    # Load data
+    # Load data_X
     df, cancellation_labels = load_data("../datasets/agoda_cancellation_train.csv")
     train_X, train_y, test_X, test_y = split_train_test(df, cancellation_labels)
 
-    # Fit model over data
+    # Fit model over data_X
     estimator = AgodaCancellationEstimator().fit(train_X, train_y)
 
     # Store model predictions over test set

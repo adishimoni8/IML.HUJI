@@ -13,7 +13,7 @@ class Perceptron(BaseEstimator):
     """
     Perceptron half-space classifier
 
-    Finds a separating hyperplane for given linearly separable data.
+    Finds a separating hyperplane for given linearly separable data_X.
 
     Attributes
     ----------
@@ -21,7 +21,7 @@ class Perceptron(BaseEstimator):
         Should fitted model include an intercept or not
 
     max_iter_: int, default = 1000
-        Maximum number of passes over training data
+        Maximum number of passes over training data_X
 
     coefs_: ndarray of shape (n_features,) or (n_features+1,)
         Coefficients vector fitted by Perceptron algorithm. To be set in
@@ -46,10 +46,10 @@ class Perceptron(BaseEstimator):
             Should fitted model include an intercept or not
 
         max_iter: int, default = 1000
-            Maximum number of passes over training data
+            Maximum number of passes over training data_X
 
         callback: Callable[[Perceptron, np.ndarray, int], None]
-            A callable to be called after each update of the model while fitting to given data
+            A callable to be called after each update of the model while fitting to given data_X
             Callable function should receive as input a Perceptron instance, current sample and current response
 
         Attributes
@@ -58,10 +58,10 @@ class Perceptron(BaseEstimator):
             Should fitted model include an intercept or not
 
         max_iter): int, default = 1000
-            Maximum number of passes over training data
+            Maximum number of passes over training data_X
 
         callback_: Callable[[Perceptron, np.ndarray, int], None]
-            A callable to be called after each update of the model while fitting to given data
+            A callable to be called after each update of the model while fitting to given data_X
             Callable function should receive as input a Perceptron instance, current sample and current response
 
         coefs_: ndarray of shape (n_features,) or (n_features+1,)
@@ -75,16 +75,16 @@ class Perceptron(BaseEstimator):
 
     def _fit(self, X: np.ndarray, y: np.ndarray) -> NoReturn:
         """
-        Fit a halfspace to to given samples. Iterate over given data as long as there exists a sample misclassified
+        Fit a halfspace to to given samples. Iterate over given data_X as long as there exists a sample misclassified
         or that did not reach `self.max_iter_`
 
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to fit an estimator for
+            Input data_X to fit an estimator for
 
         y : ndarray of shape (n_samples, )
-            Responses of input data to fit to
+            Responses of input data_X to fit to
 
         Notes
         -----
@@ -99,7 +99,7 @@ class Perceptron(BaseEstimator):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to predict responses for
+            Input data_X to predict responses for
 
         Returns
         -------

@@ -1,4 +1,4 @@
-# Basic imports and settings for working with data
+# Basic imports and settings for working with data_X
 import numpy as np
 import pandas as pd
 
@@ -74,7 +74,7 @@ def animation_to_gif(fig, filename, frame_duration=100, width=1200, height=800):
     import gif
     @gif.frame
     def plot(f, i):
-        f_ = go.Figure(data=f["frames"][i]["data"], layout=f["layout"])
+        f_ = go.Figure(data=f["frames"][i]["data_X"], layout=f["layout"])
         f_["layout"]["updatemenus"] = []
         f_.update_layout(title=f["frames"][i]["layout"]["title"], width=width, height=height)
         return f_

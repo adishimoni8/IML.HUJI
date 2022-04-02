@@ -41,7 +41,7 @@ class UnivariateGaussian:
         Parameters
         ----------
         X: ndarray of shape (n_samples, )
-            Training data
+            Training data_X
 
         Returns
         -------
@@ -85,7 +85,7 @@ class UnivariateGaussian:
     @staticmethod
     def log_likelihood(mu: float, sigma: float, X: np.ndarray) -> float:
         """
-        Calculate the log-likelihood of the data under a specified Gaussian model
+        Calculate the log-likelihood of the data_X under a specified Gaussian model
 
         Parameters
         ----------
@@ -138,7 +138,7 @@ class MultivariateGaussian:
         Parameters
         ----------
         X: ndarray of shape (n_samples, n_features)
-            Training data
+            Training data_X
 
         Returns
         -------
@@ -186,7 +186,7 @@ class MultivariateGaussian:
     @staticmethod
     def log_likelihood(mu: np.ndarray, cov: np.ndarray, X: np.ndarray) -> float:
         """
-        Calculate the log-likelihood of the data under a specified Gaussian model
+        Calculate the log-likelihood of the data_X under a specified Gaussian model
 
         Parameters
         ----------
@@ -200,7 +200,7 @@ class MultivariateGaussian:
         Returns
         -------
         log_likelihood: float
-            log-likelihood calculated over all input data and under given parameters of Gaussian
+            log-likelihood calculated over all input data_X and under given parameters of Gaussian
         """
         m, d = X.shape
         cov_inv = np.linalg.inv(cov)

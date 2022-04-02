@@ -50,10 +50,10 @@ class RidgeRegression(BaseEstimator):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to fit an estimator for
+            Input data_X to fit an estimator for
 
         y : ndarray of shape (n_samples, )
-            Responses of input data to fit to
+            Responses of input data_X to fit to
 
         Notes
         -----
@@ -68,7 +68,7 @@ class RidgeRegression(BaseEstimator):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to predict responses for
+            Input data_X to predict responses for
 
         Returns
         -------

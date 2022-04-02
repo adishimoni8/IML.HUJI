@@ -29,10 +29,10 @@ class PolynomialFitting(BaseEstimator):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to fit an estimator for
+            Input data_X to fit an estimator for
 
         y : ndarray of shape (n_samples, )
-            Responses of input data to fit to
+            Responses of input data_X to fit to
         """
         self.linear_reg.fit(self.__transform(X), y)
 
@@ -43,7 +43,7 @@ class PolynomialFitting(BaseEstimator):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to predict responses for
+            Input data_X to predict responses for
 
         Returns
         -------
@@ -69,7 +69,7 @@ class PolynomialFitting(BaseEstimator):
         loss : float
             Performance under MSE loss function
         """
-        self.linear_reg.loss(self.__transform(X), y)
+        return self.linear_reg.loss(self.__transform(X), y)
 
     def __transform(self, X: np.ndarray) -> np.ndarray:
         """
@@ -84,4 +84,4 @@ class PolynomialFitting(BaseEstimator):
         transformed: ndarray of shape (n_samples, k+1)
             Vandermonde matrix of given samples up to degree k
         """
-        return np.vander(X, self.k + 1)
+        return np.vander(X, self.k + 1, increasing=True)

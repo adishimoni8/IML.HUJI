@@ -14,7 +14,7 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
         Data frame of samples and feature values.
 
     y : Series of shape (n_samples, )
-        Responses corresponding samples in data frame.
+        Responses corresponding samples in data_X frame.
 
     train_proportion: Fraction of samples to be split as training set
 
@@ -33,10 +33,13 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
         Responses of test samples
 
     """
-    m, _ = X.shape
-    train_num = int(np.ceil(train_proportion * m))
-    train_X, test_X = X.iloc[:train_num], X.iloc[train_num:]
-    train_y, test_y = y.iloc[:train_num], y.iloc[train_num:]
+    random_X = X.sample(frac=1.0)
+    random_y = y[random_X.index]
+    sep = np.ceil((len(random_X) - 1) * 0.75).astype(int) # Count starts from 1.
+    train_X = random_X.iloc[:sep]
+    train_y = random_y.iloc[:sep]
+    test_X = random_X.iloc[sep:]
+    test_y = random_y.iloc[sep:]
     return train_X, train_y, test_X, test_y
 
 

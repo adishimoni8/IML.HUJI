@@ -36,9 +36,9 @@ class BaseEstimator(ABC):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to fit an estimator for
+            Input data_X to fit an estimator for
         y : ndarray of shape (n_samples, )
-            Responses of input data to fit to
+            Responses of input data_X to fit to
 
         Returns
         -------
@@ -59,7 +59,7 @@ class BaseEstimator(ABC):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to predict responses for
+            Input data_X to predict responses for
 
         Returns
         -------
@@ -107,10 +107,10 @@ class BaseEstimator(ABC):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to fit an estimator for
+            Input data_X to fit an estimator for
 
         y : ndarray of shape (n_samples, )
-            Responses of input data to fit to
+            Responses of input data_X to fit to
         """
         raise NotImplementedError()
 
@@ -122,7 +122,7 @@ class BaseEstimator(ABC):
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to predict responses for
+            Input data_X to predict responses for
 
         Returns
         -------
@@ -153,15 +153,15 @@ class BaseEstimator(ABC):
 
     def fit_predict(self, X: np.ndarray, y: np.ndarray) -> np.ndarray:
         """
-        Fit an estimator over given input data and predict responses for given samples
+        Fit an estimator over given input data_X and predict responses for given samples
 
         Parameters
         ----------
         X : ndarray of shape (n_samples, n_features)
-            Input data to fit an estimator for
+            Input data_X to fit an estimator for
 
         y : ndarray of shape (n_samples, )
-            Responses of input data to fit to
+            Responses of input data_X to fit to
 
         Returns
         -------

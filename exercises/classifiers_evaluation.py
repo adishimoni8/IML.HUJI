@@ -15,7 +15,7 @@ def load_dataset(filename: str) -> Tuple[np.ndarray, np.ndarray]:
     Parameters
     ----------
     filename: str
-        Path to .npy data file
+        Path to .npy data_X file
 
     Returns
     -------
