@@ -97,7 +97,7 @@ if __name__ == '__main__':
         losses.append(p_model.loss(country_X, country_y))
     plt.figure()
     plt.bar(countries, losses)
-    plt.title('Loss of israel-trained PolyModel against other contries')
+    plt.title('Loss of Israel-trained PolyModel against other contries')
     plt.xlabel('Country')
     plt.ylabel('Loss')
     plt.show()

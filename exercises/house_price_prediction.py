@@ -67,6 +67,8 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         Path to folder in which plots are saved
     """
     for col_name, col in X.iteritems():
+        if not isinstance(col_name, str):
+            continue
         correlation = str(y.cov(col) / (y.std() * col.std()))  # The pearson correlation
         plt.figure()
         plt.title(f"Pearson Correlation: {correlation}")
@@ -74,7 +76,7 @@ def feature_evaluation(X: pd.DataFrame, y: pd.Series, output_path: str = ".") ->
         plt.ylabel('price')
         plt.scatter(x=col, y=y)
         plt.savefig(f"{output_path}/{col_name}")
-
+        plt.clf()
 
 if __name__ == '__main__':
     np.random.seed(0)
@@ -83,7 +85,7 @@ if __name__ == '__main__':
     X, y = load_data('../datasets/house_prices.csv')
 
     # Question 2 - Feature evaluation with respect to response
-    # feature_evaluation(X, y)
+    feature_evaluation(X, y)
 
     # Question 3 - Split samples into training- and testing sets.
     train_X, train_y, test_X, test_y = split_train_test(X, y, 0.75)
