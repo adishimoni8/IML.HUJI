@@ -7,6 +7,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from math import atan2, pi
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 
 
 def load_dataset(filename: str) -> Tuple[np.ndarray, np.ndarray]:
@@ -107,9 +108,9 @@ def compare_gaussian_classifiers():
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # Create subplots
         from IMLearn.metrics import accuracy
-        colors = {0.: 'red', 1.: 'green', 2.: 'blue'}
+        colors = {0.: 'silver', 1.: 'gold', 2.: 'magenta'}
         markers = {0.: '^', 1.: 'o', 2.: 's'}
-        figure, (ax1, ax2) = plt.subplots(1, 2)
+        figure, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 4))
         gaussian_naive_bayes_loss = round(accuracy(y, gaussian_naive_bayes_y_pred), 3)
         lda_loss = round(accuracy(y, lda_y_pred), 3)
         name = f.split('/')[-1].split('.')[0] + ' dataset'
@@ -121,9 +122,18 @@ def compare_gaussian_classifiers():
             ax1.scatter(X[i][0], X[i][1], c=colors[gaussian_naive_bayes_y_pred[i]], marker=markers[y[i]], s=10)
             ax2.scatter(X[i][0], X[i][1], c=colors[lda_y_pred[i]], marker=markers[y[i]], s=10)
 
+        legend_elements = [Line2D([0], [0], color='silver', lw=4, label='Predict 0'),
+                           Line2D([0], [0], color='gold', lw=4, label='Predict 1'),
+                           Line2D([0], [0], color='magenta', lw=4, label='Predict 2'),
+                           Line2D([0], [0], marker='^', color='black', label='True 0'),
+                           Line2D([0], [0], marker='o', color='black', label='True 1'),
+                           Line2D([0], [0], marker='s', color='black', label='True 2')]
+        figure.legend(handles=legend_elements, loc=4, fontsize='x-small')
+
         # Add `X` dots specifying fitted Gaussians' means
-        ax1.scatter(gaussian_naive_bayes.mu_[:, [0]], gaussian_naive_bayes.mu_[:, [1]], marker='X', c='black', s=20)
-        ax2.scatter(lda.mu_[:, [0]], lda.mu_[:, [1]], marker='X', c='black', s=20)
+        ax1.scatter(gaussian_naive_bayes.mu_[:, [0]], gaussian_naive_bayes.mu_[:, [1]], marker='x', c='black', s=50)
+        ax2.scatter(lda.mu_[:, [0]], lda.mu_[:, [1]], marker='x', c='black', s=50)
+
 
         # Add ellipses depicting the covariances of the fitted Gaussians
         for i in range(len(lda.classes_)):
