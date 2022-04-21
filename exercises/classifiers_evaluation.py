@@ -1,3 +1,5 @@
+import numpy as np
+
 from IMLearn.learners.classifiers import Perceptron, LDA, GaussianNaiveBayes
 from typing import Tuple
 from utils import *
@@ -80,39 +82,58 @@ def get_ellipse(mu: np.ndarray, cov: np.ndarray):
     t = np.linspace(0, 2 * pi, 100)
     xs = (l1 * np.cos(theta) * np.cos(t)) - (l2 * np.sin(theta) * np.sin(t))
     ys = (l1 * np.sin(theta) * np.cos(t)) + (l2 * np.cos(theta) * np.sin(t))
-
-    return go.Scatter(x=mu[0] + xs, y=mu[1] + ys, mode="lines", marker_color="black")
+    return mu, xs, ys
+    # return plt.scatter(x=mu[0] + xs, y=mu[1] + ys, mode="lines", marker_color="black")
 
 
 def compare_gaussian_classifiers():
     """
     Fit both Gaussian Naive Bayes and LDA classifiers on both gaussians1 and gaussians2 datasets
     """
-    for f in ["gaussian1.npy", "gaussian2.npy"]:
+    for f in ["../datasets/gaussian1.npy", "../datasets/gaussian2.npy"]:
         # Load dataset
-        raise NotImplementedError()
+        data = np.load(f)
+        X, y = data[:, [0, 1]], data[:, 2]
 
         # Fit models and predict over training set
-        raise NotImplementedError()
+        lda = LDA()
+        lda.fit(X, y)
+        lda_y_pred = lda.predict(X)
+        gaussian_naive_bayes = GaussianNaiveBayes()
+        gaussian_naive_bayes.fit(X, y)
+        gaussian_naive_bayes_y_pred = gaussian_naive_bayes.predict(X)
 
         # Plot a figure with two suplots, showing the Gaussian Naive Bayes predictions on the left and LDA predictions
         # on the right. Plot title should specify dataset used and subplot titles should specify algorithm and accuracy
         # Create subplots
         from IMLearn.metrics import accuracy
-        raise NotImplementedError()
+        colors = {0.: 'red', 1.: 'green', 2.: 'blue'}
+        markers = {0.: '^', 1.: 'o', 2.: 's'}
+        figure, (ax1, ax2) = plt.subplots(1, 2)
+        gaussian_naive_bayes_loss = round(accuracy(y, gaussian_naive_bayes_y_pred), 3)
+        lda_loss = round(accuracy(y, lda_y_pred), 3)
+        name = f.split('/')[-1].split('.')[0] + ' dataset'
+        ax1.set_title(name + '\n Gaussian Naive Bayes. Accuracy: ' + str(gaussian_naive_bayes_loss), fontsize='small')
+        ax2.set_title(name + '\n Lda. Accuracy: ' + str(lda_loss), fontsize='small')
 
         # Add traces for data-points setting symbols and colors
-        raise NotImplementedError()
+        for i in range(len(y)):
+            ax1.scatter(X[i][0], X[i][1], c=colors[gaussian_naive_bayes_y_pred[i]], marker=markers[y[i]], s=10)
+            ax2.scatter(X[i][0], X[i][1], c=colors[lda_y_pred[i]], marker=markers[y[i]], s=10)
 
         # Add `X` dots specifying fitted Gaussians' means
-        raise NotImplementedError()
+        ax1.scatter(gaussian_naive_bayes.mu_[:, [0]], gaussian_naive_bayes.mu_[:, [1]], marker='X', c='black', s=20)
+        ax2.scatter(lda.mu_[:, [0]], lda.mu_[:, [1]], marker='X', c='black', s=20)
 
         # Add ellipses depicting the covariances of the fitted Gaussians
-        raise NotImplementedError()
-
+        for i in range(len(lda.classes_)):
+            lda_mu, lda_xs, lda_ys = get_ellipse(lda.mu_[i], lda.cov_)
+            gauss_mu, gauss_xs, gauss_ys = get_ellipse(gaussian_naive_bayes.mu_[i], gaussian_naive_bayes.vars_[i])
+            ax1.plot(gauss_mu[0] + gauss_xs, gauss_mu[1] + gauss_ys, c="black", linewidth=1)
+            ax2.plot(lda_mu[0] + lda_xs, lda_mu[1] + lda_ys, c="black", linewidth=1)
+        plt.show()
 
 if __name__ == '__main__':
-    X = np.array([1])
     np.random.seed(0)
-    run_perceptron()
-    # compare_gaussian_classifiers()
+    # run_perceptron()
+    compare_gaussian_classifiers()
