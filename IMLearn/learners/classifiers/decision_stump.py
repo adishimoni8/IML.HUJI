@@ -1,8 +1,10 @@
 from __future__ import annotations
 from typing import Tuple, NoReturn
+import numpy
 from ...base import BaseEstimator
 import numpy as np
 from itertools import product
+from ...metrics import misclassification_error
 
 
 class DecisionStump(BaseEstimator):
@@ -39,7 +41,17 @@ class DecisionStump(BaseEstimator):
         y : ndarray of shape (n_samples, )
             Responses of input data to fit to
         """
-        raise NotImplementedError()
+        m, d = X.shape
+        loss = None
+        for j in range(d):
+            for i in [-1, 1]:
+                threshold_, loss_ = self._find_threshold(X[:, j], y, i)
+                if loss and loss <= loss_:
+                    continue
+                loss = loss_
+                self.threshold_ = threshold_
+                self.sign_ = i
+                self.j_ = j
 
     def _predict(self, X: np.ndarray) -> np.ndarray:
         """
@@ -63,7 +75,7 @@ class DecisionStump(BaseEstimator):
         Feature values strictly below threshold are predicted as `-sign` whereas values which equal
         to or above the threshold are predicted as `sign`
         """
-        raise NotImplementedError()
+        return np.where(X[:, self.j_] >= self.threshold_, self.sign_, -self.sign_)
 
     def _find_threshold(self, values: np.ndarray, labels: np.ndarray, sign: int) -> Tuple[float, float]:
         """
@@ -95,7 +107,26 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
-        raise NotImplementedError()
+        if sign == -1:
+            labels = -labels
+        # First, we sort X (and y accordingly):
+        sort_X_index = np.argsort(values)
+        sort_X = values[sort_X_index]
+        sort_y = labels[sort_X_index]
+        # Then we take the minimizer of the cumulative sum of sort_y_increasing. It is
+        # the last place to classify as -1, so we will take one more step:
+        min_threshold_ind = np.argmin(np.cumsum(sort_y)) + 1
+        # If we're out of boundary:
+        if min_threshold_ind >= len(sort_X):
+            threshold = sort_X[-1] + 1
+        elif min_threshold_ind == 1 and sort_y[0] == 1:
+            threshold = sort_X[0] - 1
+        else:
+            threshold = sort_X[min_threshold_ind]
+        # Now, to find the error we need to consider the weights:
+        sep_values = np.where(sort_X >= threshold, 1, -1)
+        error = np.sum(np.where(np.sign(sort_y) != sep_values, 1, 0) * np.abs(sort_y))
+        return threshold, error
 
     def _loss(self, X: np.ndarray, y: np.ndarray) -> float:
         """
@@ -114,4 +145,5 @@ class DecisionStump(BaseEstimator):
         loss : float
             Performance under missclassification loss function
         """
-        raise NotImplementedError()
+        y_ = np.where(self.predict(X) > 0, 1, -1)
+        return misclassification_error(y, y_)
