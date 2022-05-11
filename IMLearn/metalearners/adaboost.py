@@ -120,7 +120,7 @@ class AdaBoost(BaseEstimator):
         result = np.zeros(m)
         for t in range(T):
             result += self.weights_[t] * self.models_[t].predict(X)
-        return np.sign(result)
+        return np.where(result > 0, 1, -1)
 
     def partial_loss(self, X: np.ndarray, y: np.ndarray, T: int) -> float:
         """

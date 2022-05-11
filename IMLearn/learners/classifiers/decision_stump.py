@@ -1,6 +1,5 @@
 from __future__ import annotations
 from typing import Tuple, NoReturn
-import numpy
 from ...base import BaseEstimator
 import numpy as np
 from itertools import product
@@ -46,7 +45,7 @@ class DecisionStump(BaseEstimator):
         for j in range(d):
             for i in [-1, 1]:
                 threshold_, loss_ = self._find_threshold(X[:, j], y, i)
-                if loss and loss <= loss_:
+                if loss and loss < loss_:
                     continue
                 loss = loss_
                 self.threshold_ = threshold_
@@ -119,8 +118,8 @@ class DecisionStump(BaseEstimator):
         # If we're out of boundary:
         if min_threshold_ind >= len(sort_X):
             threshold = sort_X[-1] + 1
-        elif min_threshold_ind == 1 and sort_y[0] == 1:
-            threshold = sort_X[0] - 1
+        elif min_threshold_ind == 1 and sort_y[0] > 0:
+            threshold = sort_X[0]
         else:
             threshold = sort_X[min_threshold_ind]
         # Now, to find the error we need to consider the weights:
