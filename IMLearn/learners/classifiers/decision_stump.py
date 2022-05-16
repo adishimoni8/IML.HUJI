@@ -106,6 +106,7 @@ class DecisionStump(BaseEstimator):
         For every tested threshold, values strictly below threshold are predicted as `-sign` whereas values
         which equal to or above the threshold are predicted as `sign`
         """
+        # A nice algorithm I've learned, works for sign = 1, so if the sign is -1 we switch the labels:
         if sign == -1:
             labels = -labels
         # First, we sort X (and y accordingly):

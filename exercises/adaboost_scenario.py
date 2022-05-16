@@ -74,12 +74,11 @@ def fit_and_evaluate_adaboost(noise, n_learners=250, train_size=5000, test_size=
     # Question 3: Decision surface of best performing ensemble
     # Done in q2, this is the last one (T = 250).
 
-
     # Question 4: Decision surface with weighted samples
     xrange, yrange = np.linspace(*lims[0], 120), np.linspace(*lims[1], 120)
     xx, yy = np.meshgrid(xrange, yrange)
     z = adaboost.predict(np.c_[xx.ravel(), yy.ravel()]).reshape(xx.shape)
-    size = adaboost.D_/np.max(adaboost.D_) * 5
+    size = (adaboost.D_/np.max(adaboost.D_)) * 5
     plt.contourf(xx, yy, z, cmap='Greys')
     plt.colorbar()
     plt.title('Full ensemble decision boundary with size proportional to last weight', fontsize=10, y=1.03)
