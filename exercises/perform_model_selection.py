@@ -7,10 +7,10 @@ from IMLearn.utils import split_train_test
 from IMLearn.model_selection import cross_validate
 from IMLearn.learners.regressors import PolynomialFitting, LinearRegression, RidgeRegression
 from sklearn.linear_model import Lasso
-
 from utils import *
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+import matplotlib.pyplot as plt
 
 
 def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
@@ -27,14 +27,42 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     """
     # Question 1 - Generate dataset for model f(x)=(x+3)(x+2)(x+1)(x-1)(x-2) + eps for eps Gaussian noise
     # and split into training- and testing portions
-    raise NotImplementedError()
+    func = np.vectorize(lambda x: (x+3) * (x+2) * (x+1) * (x-1) * (x-2))
+    X = np.random.uniform(-1.2, 2, n_samples)
+    y = func(X) + np.random.normal(0, noise, n_samples)
+    train_X, train_y, test_X, test_y = split_train_test(pd.DataFrame(X), pd.Series(y), 2/3)
+    train_X, train_y, test_X, test_y = train_X.to_numpy().reshape(-1),\
+                                       train_y.to_numpy().reshape(-1),\
+                                       test_X.to_numpy().reshape(-1),\
+                                       test_y.to_numpy().reshape(-1)
+    plt.scatter(train_X, train_y, label='Train Samples')
+    plt.scatter(test_X, test_y, label='Test Samples')
+    plt.title('Train and Test samples drawn from the f(x)+epsilon')
+    plt.xlabel('x')
+    plt.ylabel('f(x)+epsilon')
+    plt.legend()
+    plt.show()
 
     # Question 2 - Perform CV for polynomial fitting with degrees 0,1,...,10
-    raise NotImplementedError()
+    degrees = np.linspace(0, 10, 11).astype(int)
+    training_errors = np.zeros(11)
+    validation_errors = np.zeros(11)
+    for k in degrees:
+        p_model = PolynomialFitting(k)
+        training_errors[k], validation_errors[k] = cross_validate(p_model, train_X, train_y, mean_square_error)
+    plt.plot(degrees, training_errors, label='Training error')
+    plt.plot(degrees, validation_errors, label='Validation Error')
+    plt.title('Average training and validation error as a function of polynomial degree')
+    plt.xlabel('Degree')
+    plt.ylabel('Error')
+    plt.legend()
+    plt.show()
 
     # Question 3 - Using best value of k, fit a k-degree polynomial model and report test error
-    raise NotImplementedError()
-
+    k_star = np.argmin(validation_errors)
+    p_model = PolynomialFitting(k_star)
+    error = mean_square_error(p_model.fit(train_X, train_y).predict(test_X), test_y)
+    print(round(error, 2))
 
 def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 500):
     """
@@ -50,15 +78,14 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
         Number of regularization parameter values to evaluate for each of the algorithms
     """
     # Question 6 - Load diabetes dataset and split into training and testing portions
-    raise NotImplementedError()
 
     # Question 7 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
-    raise NotImplementedError()
 
     # Question 8 - Compare best Ridge model, best Lasso model and Least Squares model
-    raise NotImplementedError()
 
 
 if __name__ == '__main__':
     np.random.seed(0)
-    raise NotImplementedError()
+    select_polynomial_degree()
+    select_polynomial_degree(noise=0)
+    select_polynomial_degree(1500, 10)
