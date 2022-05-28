@@ -28,8 +28,9 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     # Question 1 - Generate dataset for model f(x)=(x+3)(x+2)(x+1)(x-1)(x-2) + eps for eps Gaussian noise
     # and split into training- and testing portions
     func = np.vectorize(lambda x: (x+3) * (x+2) * (x+1) * (x-1) * (x-2))
-    X = np.random.uniform(-1.2, 2, n_samples)
-    y = func(X) + np.random.normal(0, noise, n_samples)
+    X = np.linspace(-1.2, 2, n_samples)
+    y_no_noise = func(X)
+    y = y_no_noise + np.random.normal(0, noise, n_samples)
     train_X, train_y, test_X, test_y = split_train_test(pd.DataFrame(X), pd.Series(y), 2/3)
     train_X, train_y, test_X, test_y = train_X.to_numpy().reshape(-1),\
                                        train_y.to_numpy().reshape(-1),\
@@ -37,6 +38,7 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
                                        test_y.to_numpy().reshape(-1)
     plt.scatter(train_X, train_y, label='Train Samples')
     plt.scatter(test_X, test_y, label='Test Samples')
+    plt.scatter(X, y_no_noise, label='True Model', s=2, c='black')
     plt.title('Train and Test samples drawn from the f(x)+epsilon')
     plt.xlabel('x')
     plt.ylabel('f(x)+epsilon')
@@ -60,9 +62,10 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
 
     # Question 3 - Using best value of k, fit a k-degree polynomial model and report test error
     k_star = np.argmin(validation_errors)
-    p_model = PolynomialFitting(k_star)
-    error = mean_square_error(p_model.fit(train_X, train_y).predict(test_X), test_y)
-    print(round(error, 2))
+    p_model = PolynomialFitting(k_star).fit(train_X, train_y)
+    loss = p_model.loss(test_X, test_y)
+    print(round(loss, 2))
+
 
 def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 500):
     """
@@ -78,14 +81,53 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
         Number of regularization parameter values to evaluate for each of the algorithms
     """
     # Question 6 - Load diabetes dataset and split into training and testing portions
+    data = datasets.load_diabetes()
+    X = data.data
+    y = data.target
+    train_X, train_y, test_X, test_y = X[:50], y[:50], X[50:], y[50:]
 
     # Question 7 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
+    lambdas = np.linspace(0, 1, n_evaluations)
+    training_errors_ridge = np.zeros(n_evaluations)
+    validation_errors_ridge = np.zeros(n_evaluations)
+    training_errors_lasso = np.zeros(n_evaluations)
+    validation_errors_lasso = np.zeros(n_evaluations)
+    fig, (ax1, ax2) = plt.subplots(1, 2)
+    for i, lam in enumerate(lambdas):
+        ridge = RidgeRegression(lam)
+        lasso = Lasso(alpha=lam)
+        training_errors_ridge[i], validation_errors_ridge[i] = cross_validate(ridge, train_X, train_y, mean_square_error)
+        training_errors_lasso[i], validation_errors_lasso[i] = cross_validate(lasso, train_X, train_y, mean_square_error)
+    ax1.plot(lambdas, training_errors_ridge, label='Training error')
+    ax1.plot(lambdas, validation_errors_ridge, label='Validation Error')
+    ax2.plot(lambdas, training_errors_lasso, label='Training error')
+    ax2.plot(lambdas, validation_errors_lasso, label='Validation Error')
+    ax1.set_title('Ridge')
+    ax2.set_title('Lasso')
+    fig.supxlabel('Lambda')
+    fig.supylabel('Error')
+    fig.suptitle('Average training and validation error as a function of Lambda')
+    fig.show()
 
     # Question 8 - Compare best Ridge model, best Lasso model and Least Squares model
+    k_star_ridge = lambdas[np.argmin(validation_errors_ridge)]
+    k_star_lasso = lambdas[np.argmin(validation_errors_lasso)]
+    ridge = RidgeRegression(k_star_ridge).fit(train_X, train_y)
+    lasso = Lasso(alpha=k_star_lasso).fit(train_X, train_y)
+    linear_regression = LinearRegression().fit(train_X, train_y)
 
+    error_ridge = ridge.loss(test_X, test_y)
+    error_lasso = mean_square_error(lasso.fit(train_X, train_y).predict(test_X), test_y)
+    error_linear_regression = linear_regression.loss(test_X, test_y)
+
+    print('Ridge Error: ' + str(round(error_ridge, 2)),
+          'Lasso Error: ' + str(round(error_lasso, 2)),
+          'Least Squares Error: ' + str(round(error_linear_regression, 2)),
+          sep='\n')
 
 if __name__ == '__main__':
     np.random.seed(0)
     select_polynomial_degree()
     select_polynomial_degree(noise=0)
     select_polynomial_degree(1500, 10)
+    select_regularization_parameter()

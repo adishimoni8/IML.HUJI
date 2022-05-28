@@ -35,7 +35,7 @@ def split_train_test(X: pd.DataFrame, y: pd.Series, train_proportion: float = .7
     """
     random_X = X.sample(frac=1.0)
     random_y = y[random_X.index]
-    sep = np.ceil((len(random_X) - 1) * 0.75).astype(int) # Count starts from 1.
+    sep = np.ceil((len(random_X) - 1) * train_proportion).astype(int) # Count starts from 1.
     train_X = random_X.iloc[:sep]
     train_y = random_y.iloc[:sep]
     test_X = random_X.iloc[sep:]
