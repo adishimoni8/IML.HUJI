@@ -27,7 +27,7 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     """
     # Question 1 - Generate dataset for model f(x)=(x+3)(x+2)(x+1)(x-1)(x-2) + eps for eps Gaussian noise
     # and split into training- and testing portions
-    func = np.vectorize(lambda x: (x+3) * (x+2) * (x+1) * (x-1) * (x-2))
+    func = lambda x: (x+3) * (x+2) * (x+1) * (x-1) * (x-2)
     X = np.linspace(-1.2, 2, n_samples)
     y_no_noise = func(X)
     y = y_no_noise + np.random.normal(0, noise, n_samples)
@@ -64,7 +64,9 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     k_star = np.argmin(validation_errors)
     p_model = PolynomialFitting(k_star).fit(train_X, train_y)
     loss = p_model.loss(test_X, test_y)
-    print(round(loss, 2))
+    print(str(n_samples) + ' Samples with noise ' + str(noise))
+    print("The best degree: ", k_star)
+    print("MSE: ", round(loss, 2))
 
 
 def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 500):
@@ -81,49 +83,59 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
         Number of regularization parameter values to evaluate for each of the algorithms
     """
     # Question 6 - Load diabetes dataset and split into training and testing portions
-    data = datasets.load_diabetes()
-    X = data.data
-    y = data.target
-    train_X, train_y, test_X, test_y = X[:50], y[:50], X[50:], y[50:]
+    X, y = datasets.load_diabetes(return_X_y=True, as_frame=True)
+    proportion = n_samples / len(X)
+    train_X, train_y, test_X, test_y = split_train_test(X, y, proportion)
+    train_X = train_X.to_numpy()
+    train_y = train_y.to_numpy()
+    test_X = test_X.to_numpy()
+    test_y = test_y.to_numpy()
 
     # Question 7 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
-    lambdas = np.linspace(0, 1, n_evaluations)
+    lambdas_ridge = np.linspace(0, 0.0001, n_evaluations)
+    lambdas_lasso = np.linspace(0, 0.01, n_evaluations)
     training_errors_ridge = np.zeros(n_evaluations)
     validation_errors_ridge = np.zeros(n_evaluations)
     training_errors_lasso = np.zeros(n_evaluations)
     validation_errors_lasso = np.zeros(n_evaluations)
     fig, (ax1, ax2) = plt.subplots(1, 2)
-    for i, lam in enumerate(lambdas):
+    for i, lam in enumerate(lambdas_ridge):
         ridge = RidgeRegression(lam)
-        lasso = Lasso(alpha=lam)
         training_errors_ridge[i], validation_errors_ridge[i] = cross_validate(ridge, train_X, train_y, mean_square_error)
+    for i, lam in enumerate(lambdas_lasso):
+        lasso = Lasso(alpha=lam, max_iter=10_000)
         training_errors_lasso[i], validation_errors_lasso[i] = cross_validate(lasso, train_X, train_y, mean_square_error)
-    ax1.plot(lambdas, training_errors_ridge, label='Training error')
-    ax1.plot(lambdas, validation_errors_ridge, label='Validation Error')
-    ax2.plot(lambdas, training_errors_lasso, label='Training error')
-    ax2.plot(lambdas, validation_errors_lasso, label='Validation Error')
+    ax1.plot(lambdas_ridge, training_errors_ridge, label='Training error')
+    ax1.plot(lambdas_ridge, validation_errors_ridge, label='Validation Error')
+    ax1.xaxis.set_tick_params(labelsize=6)
+    ax1.legend()
+    ax2.plot(lambdas_lasso, training_errors_lasso, label='Training error')
+    ax2.plot(lambdas_lasso, validation_errors_lasso, label='Validation Error')
     ax1.set_title('Ridge')
     ax2.set_title('Lasso')
+    ax2.legend()
     fig.supxlabel('Lambda')
     fig.supylabel('Error')
     fig.suptitle('Average training and validation error as a function of Lambda')
     fig.show()
 
     # Question 8 - Compare best Ridge model, best Lasso model and Least Squares model
-    k_star_ridge = lambdas[np.argmin(validation_errors_ridge)]
-    k_star_lasso = lambdas[np.argmin(validation_errors_lasso)]
+    k_star_ridge = lambdas_ridge[np.argmin(validation_errors_ridge)]
+    k_star_lasso = lambdas_lasso[np.argmin(validation_errors_lasso)]
+
     ridge = RidgeRegression(k_star_ridge).fit(train_X, train_y)
     lasso = Lasso(alpha=k_star_lasso).fit(train_X, train_y)
     linear_regression = LinearRegression().fit(train_X, train_y)
 
     error_ridge = ridge.loss(test_X, test_y)
-    error_lasso = mean_square_error(lasso.fit(train_X, train_y).predict(test_X), test_y)
+    error_lasso = mean_square_error(lasso.predict(test_X), test_y)
     error_linear_regression = linear_regression.loss(test_X, test_y)
 
-    print('Ridge Error: ' + str(round(error_ridge, 2)),
-          'Lasso Error: ' + str(round(error_lasso, 2)),
+    print('Ridge Error: ' + str(round(error_ridge, 2)) + ', Lambda: ' + str(k_star_ridge),
+          'Lasso Error: ' + str(round(error_lasso, 2)) + ', Lambda: ' + str(k_star_lasso),
           'Least Squares Error: ' + str(round(error_linear_regression, 2)),
           sep='\n')
+
 
 if __name__ == '__main__':
     np.random.seed(0)
