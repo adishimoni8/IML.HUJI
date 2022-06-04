@@ -31,11 +31,8 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     X = np.linspace(-1.2, 2, n_samples)
     y_no_noise = func(X)
     y = y_no_noise + np.random.normal(0, noise, n_samples)
-    train_X, train_y, test_X, test_y = split_train_test(pd.DataFrame(X), pd.Series(y), 2/3)
-    train_X, train_y, test_X, test_y = train_X.to_numpy().reshape(-1),\
-                                       train_y.to_numpy().reshape(-1),\
-                                       test_X.to_numpy().reshape(-1),\
-                                       test_y.to_numpy().reshape(-1)
+    train_X, train_y, test_X, test_y = split_train_test(pd.Series(X), pd.Series(y), 2/3)
+    train_X, train_y, test_X, test_y = train_X.values, train_y.values, test_X.values, test_y.values
     plt.scatter(train_X, train_y, label='Train Samples')
     plt.scatter(test_X, test_y, label='Test Samples')
     plt.scatter(X, y_no_noise, label='True Model', s=2, c='black')
@@ -64,9 +61,13 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     k_star = np.argmin(validation_errors)
     p_model = PolynomialFitting(k_star).fit(train_X, train_y)
     loss = p_model.loss(test_X, test_y)
-    print(str(n_samples) + ' Samples with noise ' + str(noise))
+    print(str(n_samples) + ' Samples with noise=' + str(noise))
     print("The best degree: ", k_star)
     print("MSE: ", round(loss, 2))
+    print("Validation Error: ", np.min(validation_errors))
+    print('==========================')
+
+
 
 
 def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 500):
@@ -85,15 +86,11 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     # Question 6 - Load diabetes dataset and split into training and testing portions
     X, y = datasets.load_diabetes(return_X_y=True, as_frame=True)
     proportion = n_samples / len(X)
-    train_X, train_y, test_X, test_y = split_train_test(X, y, proportion)
-    train_X = train_X.to_numpy()
-    train_y = train_y.to_numpy()
-    test_X = test_X.to_numpy()
-    test_y = test_y.to_numpy()
+    train_X, train_y, test_X, test_y = X[:50].values, y[:50].values, X[50:].values, y[50:].values
 
     # Question 7 - Perform CV for different values of the regularization parameter for Ridge and Lasso regressions
-    lambdas_ridge = np.linspace(0, 0.0001, n_evaluations)
-    lambdas_lasso = np.linspace(0, 0.01, n_evaluations)
+    lambdas_ridge = np.linspace(0.001, 1, n_evaluations)
+    lambdas_lasso = np.linspace(0.001, 1, n_evaluations)
     training_errors_ridge = np.zeros(n_evaluations)
     validation_errors_ridge = np.zeros(n_evaluations)
     training_errors_lasso = np.zeros(n_evaluations)
@@ -107,7 +104,6 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
         training_errors_lasso[i], validation_errors_lasso[i] = cross_validate(lasso, train_X, train_y, mean_square_error)
     ax1.plot(lambdas_ridge, training_errors_ridge, label='Training error')
     ax1.plot(lambdas_ridge, validation_errors_ridge, label='Validation Error')
-    ax1.xaxis.set_tick_params(labelsize=6)
     ax1.legend()
     ax2.plot(lambdas_lasso, training_errors_lasso, label='Training error')
     ax2.plot(lambdas_lasso, validation_errors_lasso, label='Validation Error')
