@@ -36,7 +36,7 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     plt.scatter(train_X, train_y, label='Train Samples')
     plt.scatter(test_X, test_y, label='Test Samples')
     plt.scatter(X, y_no_noise, label='True Model', s=2, c='black')
-    plt.title('Train and Test samples drawn from the f(x)+epsilon')
+    plt.title(f'Train and Test samples drawn from the f(x)+N(0,{noise})')
     plt.xlabel('x')
     plt.ylabel('f(x)+epsilon')
     plt.legend()
@@ -64,7 +64,7 @@ def select_polynomial_degree(n_samples: int = 100, noise: float = 5):
     print(str(n_samples) + ' Samples with noise=' + str(noise))
     print("The best degree: ", k_star)
     print("MSE: ", round(loss, 2))
-    print("Validation Error: ", np.min(validation_errors))
+    print("Validation Error: ", round(np.min(validation_errors), 2))
     print('==========================')
 
 
@@ -127,8 +127,8 @@ def select_regularization_parameter(n_samples: int = 50, n_evaluations: int = 50
     error_lasso = mean_square_error(lasso.predict(test_X), test_y)
     error_linear_regression = linear_regression.loss(test_X, test_y)
 
-    print('Ridge Error: ' + str(round(error_ridge, 2)) + ', Lambda: ' + str(k_star_ridge),
-          'Lasso Error: ' + str(round(error_lasso, 2)) + ', Lambda: ' + str(k_star_lasso),
+    print('Ridge Error: ' + str(round(error_ridge, 2)) + ', Lambda: ' + str(round(k_star_ridge, 2)),
+          'Lasso Error: ' + str(round(error_lasso, 2)) + ', Lambda: ' + str(round(k_star_lasso, 2)),
           'Least Squares Error: ' + str(round(error_linear_regression, 2)),
           sep='\n')
 
